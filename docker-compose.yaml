@@ -1,19 +1,22 @@
-version: '2'
 services:
   hyper-hdr:
     container_name: hyper-hdr
     hostname: hyper-hdr
-    image: nocturno/hyper-hdr:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        HYPERHDR_VERSION: "21.0.0.0"  # Replace with the desired version
+        ARCH: "aarch64"               # Replace with the appropriate architecture (e.g., armhf, arm64, amd64) - `uname -m` helps
     network_mode: host
-    devices:
-      - /dev/video0:/dev/video0
+    privileged: true                  # Not recommended, but mounting the correct devices out of those 10+ is also ugly
     environment:
       - TZ=America/New_York
       - PGID=1000
       - PUID=1000
 
     volumes:
-      - /home/pi/containersdata/hyperhdr:/config
+      - ./config:/config
     restart: unless-stopped
     
   dozzle-agent:
