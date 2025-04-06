@@ -4,20 +4,24 @@ ARG DEBIAN_FRONTEND="noninteractive"
 ARG HYPERHDR_URL="https://github.com/awawa-dev/HyperHDR/releases/download"
 ARG HYPERHDR_VERSION=
 ARG ARCH=
+ARG FILENAME="HyperHDR-${HYPERHDR_VERSION}-Linux-${ARCH}.deb"
+ARG DOWNLOAD_LINK="${HYPERHDR_URL}/v${HYPERHDR_VERSION}/${FILENAME}"
 
-RUN \
- echo "**** install packages ****" && \
- apt-get update && \
- apt-get install -y --no-install-recommends \
-    wget && \
- echo "**** install HyperHDR ${HYPERHDR_VERSION} ****" && \
- wget -qP /tmp ${HYPERHDR_URL}/v${HYPERHDR_VERSION}/HyperHDR-${HYPERHDR_VERSION}-Linux-${ARCH}.deb && \
- apt install -y ./tmp/HyperHDR-${HYPERHDR_VERSION}-Linux-${ARCH}.deb && \
- echo "**** cleanup ****" && \
- rm -rf \
-	/tmp/* \
-	/var/lib/apt/lists/* \
-	/var/tmp/*
+# Update package lists
+RUN apt-get update
+
+# Install required packages
+RUN apt-get install -y --no-install-recommends wget
+
+# Download HyperHDR
+RUN echo "**** downloading HyperHDR from ${DOWNLOAD_LINK} ****" && \
+    wget -qP /tmp ${DOWNLOAD_LINK}
+
+# Install HyperHDR
+RUN apt install -y /tmp/${FILENAME}
+
+# Cleanup to reduce image size
+RUN rm -rf /tmp/* /var/lib/apt/lists/* /var/tmp/*
 
 # add local files
 COPY root/ /
